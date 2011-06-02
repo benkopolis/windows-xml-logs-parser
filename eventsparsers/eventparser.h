@@ -1,0 +1,37 @@
+#ifndef EVENTPARSER_H
+#define EVENTPARSER_H
+
+#include <QXmlStreamReader>
+#include "../event/event.h"
+#include <QDateTime>
+
+/**
+  * Bazowa klasa dla wszystkich klas analizuj¹cych zdarzenia.
+  * 4688 Zosta³ stworzony proces.
+  * 4689 Proces siê zakoñczy³.
+  * 4624 U¿ytkownik siê zalogowa³.
+  * 4625 U¿ytkownikowi nie uda³o siê zalogowaæ.
+  * 4634 U¿ytkownik siê wylogowa³.
+  *
+  */
+class EventParser
+{
+public:
+
+    inline int eventId() const { return _eventId; }
+
+    virtual Event* parseEvent(QXmlStreamReader& xml) = 0;
+
+protected:
+
+    EventParser(int eventId);
+
+private:
+    EventParser();
+//    EventParser(const EventParser& another);
+//    EventParser& operator = (const EventParser& another);
+
+    const int _eventId;
+};
+
+#endif // EVENTPARSER_H
