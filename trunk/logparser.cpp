@@ -45,21 +45,25 @@ void LogParser::parse(QIODevice* device)
     Event *temp_event;
     while(!xsr.atEnd() && !xsr.hasError())
     {
-	readed = xsr.readNext();
-	if(readed == QXmlStreamReader::StartElement && xsr.name().compare("EventID", Qt::CaseInsensitive) == 0)
-	{
-	    bool ok = true;
-	    QString tmp = xsr.readElementText(QXmlStreamReader::SkipChildElements);
-	    int id = tmp.toInt(&ok);
-	    if(!ok || !_parsers.contains(id))
-		continue;
-	    temp_event = _parsers[id]->parseEvent(xsr);
-	    _events.push_back(temp_event);
-	}
+		readed = xsr.readNext();
+		if(readed == QXmlStreamReader::StartElement && xsr.name().compare("EventID", Qt::CaseInsensitive) == 0)
+		{
+			bool ok = true;
+			QString tmp = xsr.readElementText(QXmlStreamReader::SkipChildElements);
+			int id = tmp.toInt(&ok);
+			if(!ok || !_parsers.contains(id))
+				continue;
+			temp_event = _parsers[id]->parseEvent(xsr);
+			if(temp_event)
+				_events.push_back(temp_event);
+		}
     }
     if(xsr.hasError())
     {
-
+		QTextStream out(stdout);
+		out << "Error at line " << xsr.lineNumber()
+			<< " and column " << xsr.columnNumber() << "." << endl;
+		out << "Error description: " << endl << xsr.errorString() << endl;
     }
 }
 

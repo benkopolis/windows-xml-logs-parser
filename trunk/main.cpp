@@ -4,6 +4,7 @@
 #include <QFile>
 #include <QDebug>
 #include "datamapper.h"
+#include "configuration.h"
 
 
 int main(int argc, char *argv[])
