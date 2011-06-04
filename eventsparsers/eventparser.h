@@ -4,6 +4,9 @@
 #include <QXmlStreamReader>
 #include "../event/event.h"
 #include <QDateTime>
+#include <QVariantList>
+#include <QVariantMap>
+#include "../datafilter.h"
 
 /**
   * Bazowa klasa dla wszystkich klas analizuj¹cych zdarzenia.
@@ -25,6 +28,8 @@ public:
 protected:
 
     EventParser(int eventId);
+
+	DataFilter * _filter;
 
 private:
     EventParser();

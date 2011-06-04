@@ -11,8 +11,8 @@ UserLogedOutEvent::UserLogedOutEvent(const QString& time, const QString& session
 				   const QString& targetSession):
 	Event(time, session, user, "UserLogedOut")
 {
-    this->_eventType = 4647;
     DataMapper* i = DataMapper::instance();
+	this->_eventType = i->id("4647", this->_type);
 	this->_TargetLogonId = i->id(targetSession, this->_type);
 	this->_TargetUserName = i->id(targetUser, this->_type);
 }

@@ -11,8 +11,8 @@ UserLogedInEvent::UserLogedInEvent(const QString& time, const QString& session, 
 				   const QString& targetSession, const QString& logonType, const QString& ip, const QString& port):
 	Event(time, session, user, "UserLogedIn")
 {
-    this->_eventType = 4624;
     DataMapper* i = DataMapper::instance();
+	this->_eventType = i->id("4624", this->_type);
 	this->_TargetLogonId = i->id(targetSession, this->_type);
 	this->_TargetUserName = i->id(targetUser, this->_type);
 	this->_LogonType = i->id(logonType, this->_type);

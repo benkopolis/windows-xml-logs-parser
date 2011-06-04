@@ -39,7 +39,7 @@ void LogParser::parse(QIODevice* device)
 {
     if(!device->isOpen())
 	if(!device->open(QIODevice::ReadOnly | QIODevice::Text))
-	    throw new Exception("Cannot open xml file.", __FILE__, __LINE__);
+		throw new Exception("Cannot open xml file to read events.", __FILE__, __LINE__);
     QXmlStreamReader xsr(device);
     QXmlStreamReader::TokenType readed;
     Event *temp_event;
@@ -64,6 +64,8 @@ void LogParser::parse(QIODevice* device)
 		out << "Error at line " << xsr.lineNumber()
 			<< " and column " << xsr.columnNumber() << "." << endl;
 		out << "Error description: " << endl << xsr.errorString() << endl;
+		out << endl << endl
+			<< "The rest of the file will not be read." << endl;
     }
 }
 
@@ -71,7 +73,7 @@ bool LogParser::saveEvents(QIODevice* device)
 {
     if(!device->isOpen())
 	if(!device->open(QIODevice::WriteOnly | QIODevice::Text))
-	    throw new Exception("Cannot open xml file.", __FILE__, __LINE__);
+		throw new Exception("Cannot open file to save parsed events.", __FILE__, __LINE__);
     QTextStream out(device);
     foreach(Event* e, this->_events)
 	out << e->toString() << endl;

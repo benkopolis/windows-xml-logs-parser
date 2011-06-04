@@ -18,7 +18,7 @@ public:
 
     //first call readDataMapper
     static DataMapper* readDataMapper(QIODevice *input);
-    bool saveDataMapper(QIODevice* output);
+	void saveDataMapper(QIODevice* output);
 
 	bool contains(const QString& value, const QString& type) const;
     bool contains(int id) const;

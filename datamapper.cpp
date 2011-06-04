@@ -1,6 +1,7 @@
 #include "datamapper.h"
 #include <QStringList>
 #include <QTextStream>
+#include "commons/exception.h"
 
 
 uint qHash(const QPair<QString, QString>& p)
@@ -16,6 +17,7 @@ DataMapper* DataMapper::_instance = 0;
 DataMapper::DataMapper(QObject *parent) :
     QObject(parent)
 {
+	_nextId = 0;
 }
 
 DataMapper* DataMapper::instance()
@@ -29,7 +31,7 @@ DataMapper* DataMapper::readDataMapper(QIODevice *input)
 		return _instance;
     if(!input->isOpen())
 		if(!input->open(QIODevice::ReadOnly | QIODevice::Text))
-		  return 0;
+		  return new DataMapper();
     _instance = new DataMapper();
     QString line;
     QString val;
@@ -64,16 +66,16 @@ DataMapper* DataMapper::readDataMapper(QIODevice *input)
 		_instance->_namesToIds[_instance->_idsToNames[id]] = id;
 		val.clear();
     }
-	int chck1 = _instance->_namesToIds.size();
-	int chck2 = _instance->_idsToNames.size();
+//	int chck1 = _instance->_namesToIds.size();
+//	int chck2 = _instance->_idsToNames.size();
     return _instance;
 }
 
-bool DataMapper::saveDataMapper(QIODevice* output)
+void DataMapper::saveDataMapper(QIODevice* output)
 {
     if(!output->isOpen())
 		if(!output->open(QIODevice::WriteOnly | QIODevice::Text))
-		  return false;
+			throw new Exception("Unable to save datamapper file.", __FILE__, __LINE__);
     QTextStream out(output);
     out << _nextId << endl;
     foreach(int i, _idsToNames.keys())
@@ -81,7 +83,6 @@ bool DataMapper::saveDataMapper(QIODevice* output)
 		out << _idsToNames[i].first << ":" << i << ":"
 				<< _idsToNames[i].second << endl;
     }
-    return true;
 }
 
 bool DataMapper::contains(const QString& value, const QString& type) const
