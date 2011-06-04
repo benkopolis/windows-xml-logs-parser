@@ -12,8 +12,12 @@ class Configuration : public QObject
 {
 Q_OBJECT
 public:
+
     static Configuration* instance();
 
+	bool validateConfiguration() const;
+
+	inline QVariantMap& properties() { return m_properties; }
 
 signals:
 

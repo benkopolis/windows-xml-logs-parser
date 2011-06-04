@@ -11,8 +11,8 @@ NewProcessCreationEvent::NewProcessCreationEvent(const QString& time, const QStr
 						 const QString& newProcessName):
 	Event(time, session, user, "NewProcessCreation")
 {
-    this->_eventType = 4624;
     DataMapper* i = DataMapper::instance();
+	this->_eventType = i->id("4624", this->_type);
 	this->_NewProcessId = i->id(newProcess, this->_type);
 	this->_NewProcessName = i->id(newProcessName, this->_type);
 	this->_ProcessId = i->id(oldProcess, this->_type);

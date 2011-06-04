@@ -23,6 +23,37 @@ Configuration::Configuration(QObject *parent) :
 {
 }
 
+bool Configuration::validateConfiguration() const
+{
+	if(this->m_properties.contains("parsedevents")==false)
+		return false;
+	if(this->m_properties.contains("inxml")==false)
+		return false;
+	if(this->m_properties.contains("outfile")==false)
+		return false;
+	QString older("eventsolderthen"), younger("eventsyoungerthen");
+	QDateTime dt, bdt;
+	uint o, y;
+	bdt = QDateTime::fromString("2000-01-01T00:00:00", Qt::ISODate);
+	if(this->m_properties.contains(older))
+	{
+		dt = QDateTime::fromString(props[older].toString(), Qt::ISODate);
+		o = dt.toTime_t() - bdt.toTime_t();
+	}
+	else
+		o = 0;
+	if(this->m_properties.contains(younger))
+	{
+		dt = QDateTime::fromString(props[younger].toString(), Qt::ISODate);
+		y = dt.toTime_t() - bdt.toTime_t();
+	}
+	else
+		y = -1;
+	if(y > o && y != -1 && o != 0)
+		throw new Exception("Invalid date-time filtering parameters.", __FILE__, __LINE__);
+	return true;
+}
+
 void Configuration::readConfig(QIODevice* device)
 {
     if(!device->isOpen())
@@ -32,7 +63,7 @@ void Configuration::readConfig(QIODevice* device)
     if(in.device()->isOpen() == false)
 	throw new Exception("Cannot open configuration file.", __FILE__, __LINE__);
     while(in.atEnd() == false)
-	this->readSingleLine(in.readLine());
+		this->readSingleLine(in.readLine());
 }
 
 void Configuration::saveConfig(QIODevice* device)
@@ -74,10 +105,10 @@ void Configuration::saveConfig(QIODevice* device)
 void Configuration::readSingleLine(QString line)
 {
     if(line.startsWith(QChar('#')))
-	return;
+		return;
     QStringList elems = line.split(QChar(':'));
     if(elems.size() != 3)
-	return;
+		return;
     QString type = elems.at(0);
     QString name = elems.at(1);
     QString value = elems.at(2);
@@ -99,7 +130,7 @@ void Configuration::readSingleLine(QString line)
 		{
 			tmp = val.toInt(&ok);
 			if(ok)
-			values.push_back(tmp);
+				values.push_back(tmp);
 		}
 		this->m_properties[name] = values;
     }

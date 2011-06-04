@@ -11,8 +11,8 @@ ProcessEndedEvent::ProcessEndedEvent(const QString& time, const QString& session
 						 const QString& processName):
 	Event(time, session, user, "ProcessEnded")
 {
-    this->_eventType = 4624;
     DataMapper* i = DataMapper::instance();
+	this->_eventType = i->id("4624", this->_type);
 	this->_ProcessId = i->id(process, this->_type);
 	this->_ProcessName = i->id(processName, this->_type);
 	this->_Status = i->id(status, this->_type);
