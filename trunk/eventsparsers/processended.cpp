@@ -19,13 +19,16 @@ Event* ProcessEndedEventParser::parseEvent(QXmlStreamReader& xml)
 		readed = xml.readNext();
 		if(xml.name().compare("TimeCreated", Qt::CaseSensitive) == 0 && readed == QXmlStreamReader::StartElement)
 		{
-			tmp = xml.readElementText(QXmlStreamReader::SkipChildElements);
+			tmp = xml.attributes().value("SystemTime").toString();
 			time = tmp.mid(0, 19);
 			dt = QDateTime::fromString(time, Qt::ISODate);
 			uint otime = dt.toTime_t() - bdt.toTime_t();
-			if(_filter->youngerThen() < otime && _filter->youngerThen() != -1)
+			if(_filter->youngerThen() > otime && _filter->youngerThen() != -1)
 				return 0;
-			if(_filter->olderThen() > otime && _filter->olderThen() != 0)
+			if(_filter->olderThen() < otime && _filter->olderThen() != 0)
+				return 0;
+			if(_filter->olderThen() != 0 && _filter->youngerThen() != -1 &&
+					!(_filter->youngerThen() < otime && _filter->olderThen() > otime))
 				return 0;
 		}
 		else if(xml.name().compare("Data", Qt::CaseSensitive) == 0 && readed == QXmlStreamReader::StartElement)

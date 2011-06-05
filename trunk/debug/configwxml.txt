@@ -1,3 +1,10 @@
 intlist:parsedevents:4625,4688,4689,4634,4624
-string:inxml:input.xml
+string:inxml:C:\Users\zby\Desktop\sample_events.xml
+#C:\Users\zby\Downloads\0do255.xml
 string:outfile:output.txt
+string:dmfile:dmfile.txt
+string:eventsolderthen:2011-04-20T12:21:13
+string:eventsyoungerthen:2011-04-17T12:21:13
+stringlist:filterav:SubjectUserName:SYSTEM,SubjectUserName:RODZINNY$
+#356268073 - younger
+#356672217 - older
