@@ -1,0 +1,3 @@
+intlist:parsedevents:4625,4688,4689,4634,4624
+string:inxml:input.xml
+string:outfile:output.txt
