@@ -3,7 +3,7 @@
 #include <QStringList>
 #include <QVariantList>
 #include <QVariant>
-
+#include <QDateTime>
 
 Configuration* Configuration::m_instance = new Configuration();
 QMutex* Configuration::m_mutex = new QMutex();
@@ -37,14 +37,14 @@ bool Configuration::validateConfiguration() const
 	bdt = QDateTime::fromString("2000-01-01T00:00:00", Qt::ISODate);
 	if(this->m_properties.contains(older))
 	{
-		dt = QDateTime::fromString(props[older].toString(), Qt::ISODate);
+		dt = QDateTime::fromString(this->m_properties.value(older).toString(), Qt::ISODate);
 		o = dt.toTime_t() - bdt.toTime_t();
 	}
 	else
 		o = 0;
 	if(this->m_properties.contains(younger))
 	{
-		dt = QDateTime::fromString(props[younger].toString(), Qt::ISODate);
+		dt = QDateTime::fromString(this->m_properties.value(younger).toString(), Qt::ISODate);
 		y = dt.toTime_t() - bdt.toTime_t();
 	}
 	else
