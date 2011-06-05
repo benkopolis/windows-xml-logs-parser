@@ -31,6 +31,8 @@ void aboutConfig(QTextStream& out);
 void aboutCmd(QTextStream& out);
 QString printException(Exception* e);
 void printException(Exception* e, QTextStream& out);
+Configuration* createConfiguration(int configPos, QStringList& args);
+DataMapper* createDataMapper(int dmPos, QStringList& args, Configuration* c);
 void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer);
 
 void aboutConfig(QTextStream& out)
@@ -76,6 +78,50 @@ void printException(Exception* e, QTextStream& out)
 		<< e->message() << endl;
 }
 
+Configuration* createConfiguration(int configPos, QStringList& args, QTextStream& out)
+{
+	QString c_file;
+	if(configPos != -1)
+		c_file = args.at(configPos+1);
+	else
+		c_file = "configwxml.txt";
+	QFile cfg_file(c_file);
+	Configuration *c = Configuration::instance();
+	c->readConfig(&cfg_file);
+	if(c->validateConfiguration() == false)
+	{
+		aboutConfig(out);
+		throw new Exception("Invalid configuration file.", __FILE__, __LINE__);
+	}
+	cfg_file.close();
+	return c;
+}
+
+DataMapper* createDataMapper(int dmPos, QStringList& args, Configuration* c)
+{
+	QString c_file;
+	if(dmPos != -1)
+		c_file = args.at(dmPos+1);
+	else
+		c_file = c->properties().value("dmfile").toString();
+	QFile dmfile(c_file);
+	DataMapper* dm = DataMapper::readDataMapper(&dmfile);
+	dmfile.close();
+	return dm;
+}
+
+void saveDataMapper(int dmPos, QStringList& args, Configuration* c, DataMapper* dm)
+{
+	QString c_file;
+	if(dmPos != -1)
+		c_file = args.at(dmPos+1);
+	else
+		c_file = c->properties().value("dmfile").toString();
+	QFile dmfile(c_file);
+	dm->saveDataMapper(&dmfile);
+	dmfile.close();
+}
+
 void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer)
 {
 	int args_position[6] = {
@@ -98,7 +144,7 @@ void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer)
 				((args_position[C_ARG] + args_position[M_ARG]) != -2 && args.size() < 7) ||
 				(abs(args_position[C_ARG] - args_position[M_ARG]) == 2) ||
 				(abs(args_position[C_ARG] - args_position[U_ARG]) == 2) ||
-				(abs(args_position[U_ARG] - args_position[M_ARG]) == 2) ||)
+				(abs(args_position[U_ARG] - args_position[M_ARG]) == 2))
 		{
 			aboutCmd(out);
 			return;
@@ -110,30 +156,48 @@ void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer)
 			aboutCmd(out);
 			return;
 		}
-		QString c_file;
-		if(args_position[C_ARG] != -1)
-			c_file = args.at(args_position[C_ARG]+1);
-		else
-			c_file = "configwxml.txt";
-		QFile cfg_file(c_file);
-		Configuration *c = Configuration::instance();
-		c->readConfig(&cfile);
-		if(c->validateConfiguration() == false)
-		{
-			aboutConfig(out);
-			return INVALID_CONFIGURATION_FILE;
-		}
-		if(args_position[M_ARG] != -1)
-			c_file = args.at(args_position[M_ARG]+1);
-		else
-			c_file = c->properties().value("dmfile");
-		QFile dmfile(c_file);
-		DataMapper* dm = DataMapper::readDataMapper(&dmfile);
+		Configuration *c = createConfiguration(args_position[C_ARG], args, out);
+		DataMapper* dm = createDataMapper(args_position[M_ARG], args, c);
 		out << dm->type(in_id) << ':' << in_id << ':' << dm->name(in_id) << endl;
 	}									// finish unmap
 	else								// parse logs
 	{
-
+		int enabled = 0;
+		for(int i=0; i< MY_ARGS_LEN; ++i)
+			enabled += args_position[i] != -1 ? 1 : 0;
+		int max_enabled = 4;
+		int min_size = 2*(enabled > max_enabled ? max_enabled : enabled);
+		if(args.size() < min_size ||
+				(abs(args_position[C_ARG] - args_position[M_ARG]) == 2) ||
+				(abs(args_position[C_ARG] - args_position[I_ARG]) == 2) ||
+				(abs(args_position[C_ARG] - args_position[O_ARG]) == 2) ||
+				(abs(args_position[I_ARG] - args_position[O_ARG]) == 2) ||
+				(abs(args_position[M_ARG] - args_position[O_ARG]) == 2) ||
+				(abs(args_position[M_ARG] - args_position[I_ARG]) == 2))
+		{
+			aboutCmd(out);
+			return;
+		}
+		QString c_file;
+		Configuration *c = createConfiguration(args_position[C_ARG], args, out);
+		DataMapper* dm = createDataMapper(args_position[M_ARG], args, c);
+		LogParser lp;
+		if(args_position[I_ARG] != -1)
+			c_file = args.at(args_position[I_ARG]+1);
+		else
+			c_file = c->properties().value("inxml").toString();
+		QFile xml_file(c_file);
+		lp.parse(&xml_file);
+		qDebug() << "parsing done.";
+		if(args_position[O_ARG] != -1)
+			c_file = args.at(args_position[O_ARG]+1);
+		else
+			c_file = c->properties().value("outfile").toString();
+		QFile o_file(c_file);
+		lp.saveEvents(&o_file);
+		qDebug() << "saving logs done.";
+		saveDataMapper(args_position[M_ARG], args, c, dm);
+		qDebug() << "saving data mapping done.";
 	}									// finish parse logs
 }
 
@@ -145,22 +209,23 @@ int main(int argc, char *argv[])
 	QTextStream out(stdout);
 	if(args.size() == 1)
 	{
-		QFile cfile("configwxml.txt");
+		QString cfg_path = a.applicationDirPath().append("/configwxml.txt");
+		QFile cfile(cfg_path);
 		Configuration *c = Configuration::instance();
-		c->readConfig(&cfile);
-		if(c->validateConfiguration() == false)
-		{
-			aboutConfig(out);
-			return INVALID_CONFIGURATION_FILE;
-		}
-
-		QFile f(c->properties().value("inxml"));
-		QFile of(c->properties().value("outfile"));
-		QFile dmfile(c->properties().value("dmfile"));
-		bool op = dmfile.open(QIODevice::ReadWrite | QIODevice::Text);
-		if(!op)
-			out << "Unable to open datamapper file - new one will be generated." << endl;
 		try {
+			c->readConfig(&cfile);
+			if(c->validateConfiguration() == false)
+			{
+				aboutConfig(out);
+				return INVALID_CONFIGURATION_FILE;
+			}
+
+			QFile f(c->properties().value("inxml").toString());
+			QFile of(c->properties().value("outfile").toString());
+			QFile dmfile(c->properties().value("dmfile").toString());
+			bool op = dmfile.open(QIODevice::ReadWrite | QIODevice::Text);
+			if(!op)
+				out << "Unable to open datamapper file - new one will be generated." << endl;
 			LogParser lp;
 			timer.start();
 			DataMapper* dm = DataMapper::readDataMapper(&dmfile);
@@ -175,16 +240,22 @@ int main(int argc, char *argv[])
 			dmfile.open(QIODevice::ReadWrite | QIODevice::Text);
 			dm->saveDataMapper(&dmfile);
 			qDebug() << "end";
-		} catch (Exception* e) {
-			printException(e, out);
-			qDebug() << printException(e);
-			int fe=0;
-			fe = 10;
-		}
+	} catch (Exception* e) {
+		printException(e, out);
+		qDebug() << printException(e);
+	}
 	}
 	else
 	{ // parse cmd
-		parseCmd(out, args, timer);
+		try
+		{
+			parseCmd(out, args, timer);
+		}
+		catch(Exception* e)
+		{
+			printException(e, out);
+			qDebug() << printException(e);
+		}
 	}
 	return GOOD;//a.exec();
 }
