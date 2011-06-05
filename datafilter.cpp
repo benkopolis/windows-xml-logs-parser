@@ -39,11 +39,11 @@ void DataFilter::initialize(Configuration* c)
 		this->_youngerThen = -1;
 	if(props.contains(fa))
 	{
-		this->_attribs = props[fa].toString().split(',');
+		this->_attribs = props.value(fa).toStringList();
 	}
 	if(props.contains(fav))
 	{
-		QStringList ll = props[fav].toString().split(',');
+		QStringList ll = props[fav].toStringList();
 		foreach(QString elem, ll)
 		{
 			QStringList tmp = elem.split(':');

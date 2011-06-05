@@ -31,6 +31,8 @@ bool Configuration::validateConfiguration() const
 		return false;
 	if(this->m_properties.contains("outfile")==false)
 		return false;
+	if(this->m_properties.contains("dmfile")==false)
+		return false;
 	QString older("eventsolderthen"), younger("eventsyoungerthen");
 	QDateTime dt, bdt;
 	uint o, y;
@@ -107,11 +109,17 @@ void Configuration::readSingleLine(QString line)
     if(line.startsWith(QChar('#')))
 		return;
     QStringList elems = line.split(QChar(':'));
-    if(elems.size() != 3)
+	if(elems.size() < 3)
 		return;
     QString type = elems.at(0);
     QString name = elems.at(1);
-    QString value = elems.at(2);
+	QString value;
+	for(int i=2; i<elems.size(); ++i)
+	{
+		value = value.append(elems.at(i));
+		value = value.append(':');
+	}
+	value = value.mid(0, value.length()-1);
     bool ok = true;
     if(QString::compare(type, "int") == 0)
     {
