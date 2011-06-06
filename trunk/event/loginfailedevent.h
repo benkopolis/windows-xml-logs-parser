@@ -5,8 +5,12 @@
 
 class LoginFailedEvent : public Event
 {
-public:
+protected:
     LoginFailedEvent();
+
+public:
+	LoginFailedEvent(const QString& time, const QString& session, const QString& user);
+
 protected:
 
 

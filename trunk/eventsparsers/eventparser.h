@@ -15,7 +15,9 @@
   * 4624 U¿ytkownik siê zalogowa³.
   * 4625 U¿ytkownikowi nie uda³o siê zalogowaæ.
   * 4634 U¿ytkownik siê wylogowa³.
-  *
+  * Aby napisaæ klasê konkretnego parsera wystarczy skopiowaæ kontruktor, metodê parsuj¹c¹ i metodê 'toString'
+  * z istniej¹cego parsera i dostosowaæ je do zdarzenia innego typu. Trzeba równie¿ pamiêtaæ
+  * o stworzeniu odpowiednich w³aœciwoœci w nowo tworzonej klasie.
   */
 class EventParser
 {

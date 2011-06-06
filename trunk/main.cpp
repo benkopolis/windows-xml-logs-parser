@@ -245,6 +245,7 @@ int main(int argc, char *argv[])
 			cfile.close();
 			dmfile.open(QIODevice::ReadWrite | QIODevice::Text);
 			dm->saveDataMapper(&dmfile);
+			dmfile.close();
 			qDebug() << "end";
 			delete dm;
 			delete c;

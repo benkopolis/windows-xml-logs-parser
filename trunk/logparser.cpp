@@ -16,6 +16,14 @@ LogParser::LogParser(QObject *parent) :
     _parsers[tmp->eventId()] = tmp;
     tmp = new UserLogedInEventParser();
     _parsers[tmp->eventId()] = tmp;
+	Configuration* c = Configuration::instance();
+	bool ok = true;
+	foreach(QVariant v, c->properties().value("parsedevents").toList())
+	{
+		_parsedEvents.push_back(v.toInt(&ok));
+		if(!ok)
+			_parsedEvents.pop_back();
+	}
 }
 
 LogParser::~LogParser()
@@ -28,18 +36,18 @@ LogParser::~LogParser()
 bool LogParser::addEventParser(EventParser* p)
 {
     if(!p->eventId())
-	return false;
+		return false;
     if(_parsers.contains(p->eventId()))
-	return false;
+		return false;
     _parsers[p->eventId()] = p;
-    return true;
+		return true;
 }
 
 void LogParser::parse(QIODevice* device)
 {
     if(!device->isOpen())
-	if(!device->open(QIODevice::ReadOnly | QIODevice::Text))
-		throw new Exception("Cannot open xml file to read events.", __FILE__, __LINE__);
+		if(!device->open(QIODevice::ReadOnly | QIODevice::Text))
+			throw new Exception("Cannot open xml file to read events.", __FILE__, __LINE__);
     QXmlStreamReader xsr(device);
     QXmlStreamReader::TokenType readed;
     Event *temp_event;
@@ -51,7 +59,7 @@ void LogParser::parse(QIODevice* device)
 			bool ok = true;
 			QString tmp = xsr.readElementText(QXmlStreamReader::SkipChildElements);
 			int id = tmp.toInt(&ok);
-			if(!ok || !_parsers.contains(id))
+			if(!ok || !_parsers.contains(id) || !_parsedEvents.contains(id))
 				continue;
 			temp_event = _parsers[id]->parseEvent(xsr);
 			if(temp_event)
@@ -72,10 +80,11 @@ void LogParser::parse(QIODevice* device)
 bool LogParser::saveEvents(QIODevice* device)
 {
     if(!device->isOpen())
-	if(!device->open(QIODevice::WriteOnly | QIODevice::Text))
-		throw new Exception("Cannot open file to save parsed events.", __FILE__, __LINE__);
+		if(!device->open(QIODevice::WriteOnly | QIODevice::Text))
+			throw new Exception("Cannot open file to save parsed events.", __FILE__, __LINE__);
     QTextStream out(device);
     foreach(Event* e, this->_events)
-	out << e->toString() << endl;
+		out << e->toString() << endl;
+	out.flush();
     return true;
 }

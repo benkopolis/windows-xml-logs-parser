@@ -23,14 +23,28 @@ signals:
 
 public slots:
 
+	/**
+	  * Parse events.
+	  */
     void parse(QIODevice* device);
+	/**
+	  * Add specyfic subclass of EventParser to parse new type of events.
+	  * You should also add event id to configuration file.
+	  */
     bool addEventParser(EventParser* p);
+	/**
+	  * Save events to file.
+	  */
     bool saveEvents(QIODevice* device);
 
 protected:
 
+	// mapa id zdarzenia na parser ktory obluguje zdarzenie
     QHash<int, EventParser* > _parsers;
+	// wszystkie zdarzenia
     QList<Event* > _events;
+	// parsowane zdarzenia
+	QList<int> _parsedEvents;
 
 
 };
