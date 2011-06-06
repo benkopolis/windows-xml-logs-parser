@@ -8,6 +8,10 @@
 
 uint qHash(const QPair<QString, QString>& p);
 
+/**
+  * This class provides storing, saving, reading and calculating
+  * mapping for every given type and information
+  */
 class DataMapper : public QObject
 {
 Q_OBJECT

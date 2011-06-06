@@ -13,7 +13,7 @@ Configuration* Configuration::instance()
 {
     m_mutex->lock();
     if(m_instance == 0)
-	m_instance = new Configuration();
+		m_instance = new Configuration();
     m_mutex->unlock();
     return m_instance;
 }
