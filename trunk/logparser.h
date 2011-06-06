@@ -8,6 +8,10 @@
 #include <QHash>
 #include <QList>
 
+/**
+  * This class reads xml and calls proper parsers when encountered
+  * one of parsed events. It also stores events and allows to save them.
+  */
 class LogParser : public QObject
 {
 Q_OBJECT

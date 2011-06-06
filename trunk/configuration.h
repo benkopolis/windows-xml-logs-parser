@@ -7,7 +7,11 @@
 #include "commons/exception.h"
 #include <QMutex>
 
-
+/**
+  * This class reads configuration from given file.
+  * Coniguration should have proper format, described in documentation.
+  * It is singleton protected by MUTEX.
+  */
 class Configuration : public QObject
 {
 Q_OBJECT

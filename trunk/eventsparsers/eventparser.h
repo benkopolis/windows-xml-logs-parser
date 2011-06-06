@@ -23,6 +23,12 @@ public:
 
     inline int eventId() const { return _eventId; }
 
+	/**
+	  * Ta metoda jest w ka¿dej klasie bardzo podobna.
+	  * Dla lokalnej czytelnoœci nie zosta³a sparametryzowana.
+	  * ¯eby zaimplementowaæ nowego parsera wystarczy j¹ skopiowaæ
+	  * i podmieniæ nazwy szukanych atrybutów oraz tworzone i zwracane zdarzenia.
+	  */
     virtual Event* parseEvent(QXmlStreamReader& xml) = 0;
 
 protected:

@@ -2,6 +2,7 @@
 #include <QStringList>
 #include "logparser.h"
 #include <QFile>
+#include <QFileInfo>
 #include <QDebug>
 #include "datamapper.h"
 #include "configuration.h"
@@ -80,11 +81,12 @@ void printException(Exception* e, QTextStream& out)
 
 Configuration* createConfiguration(int configPos, QStringList& args, QTextStream& out)
 {
-	QString c_file;
+	QFileInfo n(args.at(0));
+	QString c_file = n.path();
 	if(configPos != -1)
 		c_file = args.at(configPos+1);
 	else
-		c_file = "configwxml.txt";
+		c_file = c_file.append("/configwxml.txt");
 	QFile cfg_file(c_file);
 	Configuration *c = Configuration::instance();
 	c->readConfig(&cfg_file);
@@ -142,9 +144,9 @@ void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer)
 				(args_position[C_ARG] != -1 && args.size() < 5) ||
 				(args_position[M_ARG] != -1 && args.size() < 5) ||
 				((args_position[C_ARG] + args_position[M_ARG]) != -2 && args.size() < 7) ||
-				(abs(args_position[C_ARG] - args_position[M_ARG]) == 2) ||
-				(abs(args_position[C_ARG] - args_position[U_ARG]) == 2) ||
-				(abs(args_position[U_ARG] - args_position[M_ARG]) == 2))
+				(abs(abs(args_position[C_ARG]) - abs(args_position[M_ARG])) == 1) ||
+				(abs(abs(args_position[C_ARG]) - abs(args_position[U_ARG])) == 1) ||
+				(abs(abs(args_position[U_ARG]) - abs(args_position[M_ARG])) == 1))
 		{
 			aboutCmd(out);
 			return;
@@ -159,6 +161,8 @@ void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer)
 		Configuration *c = createConfiguration(args_position[C_ARG], args, out);
 		DataMapper* dm = createDataMapper(args_position[M_ARG], args, c);
 		out << dm->type(in_id) << ':' << in_id << ':' << dm->name(in_id) << endl;
+		delete c;
+		delete dm;
 	}									// finish unmap
 	else								// parse logs
 	{
@@ -166,14 +170,14 @@ void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer)
 		for(int i=0; i< MY_ARGS_LEN; ++i)
 			enabled += args_position[i] != -1 ? 1 : 0;
 		int max_enabled = 4;
-		int min_size = 2*(enabled > max_enabled ? max_enabled : enabled);
+		int min_size = 1+2*(enabled > max_enabled ? max_enabled : enabled);
 		if(args.size() < min_size ||
-				(abs(args_position[C_ARG] - args_position[M_ARG]) == 2) ||
-				(abs(args_position[C_ARG] - args_position[I_ARG]) == 2) ||
-				(abs(args_position[C_ARG] - args_position[O_ARG]) == 2) ||
-				(abs(args_position[I_ARG] - args_position[O_ARG]) == 2) ||
-				(abs(args_position[M_ARG] - args_position[O_ARG]) == 2) ||
-				(abs(args_position[M_ARG] - args_position[I_ARG]) == 2))
+				(abs(abs(args_position[C_ARG]) - abs(args_position[M_ARG])) == 1) ||
+				(abs(abs(args_position[C_ARG]) - abs(args_position[I_ARG])) == 1) ||
+				(abs(abs(args_position[C_ARG]) - abs(args_position[O_ARG])) == 1) ||
+				(abs(abs(args_position[I_ARG]) - abs(args_position[O_ARG])) == 1) ||
+				(abs(abs(args_position[M_ARG]) - abs(args_position[O_ARG])) == 1) ||
+				(abs(abs(args_position[M_ARG]) - abs(args_position[I_ARG])) == 1))
 		{
 			aboutCmd(out);
 			return;
@@ -198,6 +202,8 @@ void parseCmd(QTextStream& out, QStringList& args, QElapsedTimer& timer)
 		qDebug() << "saving logs done.";
 		saveDataMapper(args_position[M_ARG], args, c, dm);
 		qDebug() << "saving data mapping done.";
+		delete dm;
+		delete c;
 	}									// finish parse logs
 }
 
@@ -240,6 +246,8 @@ int main(int argc, char *argv[])
 			dmfile.open(QIODevice::ReadWrite | QIODevice::Text);
 			dm->saveDataMapper(&dmfile);
 			qDebug() << "end";
+			delete dm;
+			delete c;
 	} catch (Exception* e) {
 		printException(e, out);
 		qDebug() << printException(e);

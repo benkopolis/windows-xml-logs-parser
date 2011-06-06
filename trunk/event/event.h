@@ -6,6 +6,10 @@
 #include <QTextStream>
 #include "../datamapper.h"
 
+/**
+  * Bazowa klasa dla wszystkich zdarzeñ. To w niej (w kontruktorze i)
+  * w konstruktorach klas potomnych) wykonywane jest mapowanie.
+  */
 class Event
 {
 
@@ -21,6 +25,10 @@ public:
     inline int userId() const { return _userId; }
     inline int eventType() const { return _eventType; }
 
+	/**
+	  * Ta metoda konwertuje informacje o zdarzeniu na
+	  * postac mozliwa do odczytania przez komputer.
+	  */
     virtual QString toString();
 
 protected:

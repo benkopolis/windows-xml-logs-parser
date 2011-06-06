@@ -7,6 +7,11 @@
 #include <QStringList>
 #include <QMultiHash>
 
+/**
+  * This class provides information for filtering events.
+  * It's intances are created direct from configuration object.
+  *
+  */
 class DataFilter : public QObject
 {
 Q_OBJECT
