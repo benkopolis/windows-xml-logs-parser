@@ -1,0 +1,1 @@
+Parser of windows events log in xml. Written in Qt c++.
